@@ -28,39 +28,37 @@ export const App = () => {
   const [errorTitle, setErrorTitle] = useState(false);
 
   function handleSubmit(): void {
-    if (selectedUser === 0) {
-      setErrorSelectedUser(true);
+    const isUserValid = selectedUser !== 0;
+    const isTitleValid = title.trim().length > 0;
+
+    setErrorSelectedUser(!isUserValid);
+    setErrorTitle(!isTitleValid);
+
+    if (!isUserValid || !isTitleValid) {
+      return;
     }
 
-    if (title.trim().length === 0) {
-      setErrorTitle(true);
-    }
+    const newTodo: TodoListType = {
+      id: Math.max(0, ...todoList.map(todo => todo.id)) + 1,
+      title: title.trim(),
+      completed: false,
+      userId: selectedUser,
+      user: findUserById(selectedUser, usersFromServer),
+    };
 
-    if (selectedUser !== 0 && title.trim().length > 0) {
-      const newTodo: TodoListType = {
-        id: Math.max(0, ...todosFromServer.map(a => a.id)) + 1,
-        title: title.trim(),
-        completed: false,
-        userId: selectedUser,
-        user: findUserById(selectedUser, usersFromServer),
-      };
+    setTodoList(current => [...current, newTodo]);
+    setSelectedUser(0);
+    setTitle('');
+  }
 
-      setTodoList(curTodolist => [...curTodolist, newTodo]);
-      setSelectedUser(0);
-      setTitle('');
-      setErrorSelectedUser(false);
+  function resetErrorTitle(event: React.ChangeEvent<HTMLInputElement>) {
+    if (event.target.value.length > 0) {
       setErrorTitle(false);
     }
   }
 
-  function resetErrorTitle(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.value.length > 0) {
-      setErrorTitle(false);
-    }
-  }
-
-  function resetErrorSelectedUser(e: React.ChangeEvent<HTMLSelectElement>) {
-    if (+e.target.value !== 0) {
+  function resetErrorSelectedUser(event: React.ChangeEvent<HTMLSelectElement>) {
+    if (+event.target.value !== 0) {
       setErrorSelectedUser(false);
     }
   }
@@ -72,8 +70,8 @@ export const App = () => {
       <form
         action="/api/todos"
         method="POST"
-        onSubmit={e => {
-          e.preventDefault();
+        onSubmit={event => {
+          event.preventDefault();
           handleSubmit();
         }}
       >
@@ -83,9 +81,9 @@ export const App = () => {
             data-cy="titleInput"
             placeholder="Enter the title"
             value={title}
-            onChange={e => {
-              setTitle(e.target.value);
-              resetErrorTitle(e);
+            onChange={event => {
+              setTitle(event.target.value);
+              resetErrorTitle(event);
             }}
           />
 
@@ -96,9 +94,9 @@ export const App = () => {
           <select
             data-cy="userSelect"
             value={selectedUser}
-            onChange={e => {
-              setSelectedUser(+e.target.value);
-              resetErrorSelectedUser(e);
+            onChange={event => {
+              setSelectedUser(+event.target.value);
+              resetErrorSelectedUser(event);
             }}
           >
             <option value="0" disabled>

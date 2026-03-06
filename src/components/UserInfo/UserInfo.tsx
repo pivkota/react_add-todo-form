@@ -1,7 +1,7 @@
 import { User } from '../../api/type';
 
 interface UserProps {
-  user: User | null;
+  user: User;
 }
 
 export const UserInfo: React.FC<UserProps> = ({ user }) => {
